@@ -1,7 +1,16 @@
 import React from "react";
 
-const Dashboard = () => {
-  return <div>Dashboard</div>;
+interface Props {
+  onClick: () => void;
+}
+
+const Dashboard = ({ onClick }: Props) => {
+  return (
+    <div>
+      Dashboard
+      <button onClick={onClick}>Log Out</button>
+    </div>
+  );
 };
 
 export default Dashboard;
