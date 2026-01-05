@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabase-client";
+import { supabase } from "./supabase-client";
 
 function Auth() {
   const [email, setEmail] = useState("");

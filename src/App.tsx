@@ -1,15 +1,16 @@
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Auth from "./components/Auth";
-import Dashboard from "./components/Dashboard";
 import { useEffect, useState } from "react";
 import { supabase } from "./supabase-client";
+import AuthLayout from "./auth/components/AuthLayout";
+import { getSession, signout } from "./services/supabase/auth.service";
+import DashboardLayout from "./dashboard/components/DashboardLayout";
 
 function App() {
   const [session, setSession] = useState<any>(null);
 
   const fetchSession = async () => {
-    const currentSession = await supabase.auth.getSession();
+    const currentSession = await getSession();
     console.log(currentSession);
     setSession(currentSession.data.session);
   };
@@ -29,19 +30,25 @@ function App() {
   }, []);
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    await signout();
   };
 
   return (
     <Router>
       <Routes>
-        <Route
+        {/* <Route
           path="/"
           element={!session ? <Auth /> : <Dashboard onClick={logout} />}
         />
         <Route
           path="/dashboard"
           element={session ? <Dashboard onClick={logout} /> : <Auth />}
+        /> */}
+        <Route
+          path="/"
+          element={
+            !session ? <AuthLayout /> : <DashboardLayout logout={logout} />
+          }
         />
       </Routes>
     </Router>
