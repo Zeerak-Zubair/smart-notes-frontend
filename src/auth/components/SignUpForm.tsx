@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { signup } from "../../services/supabase/auth.service";
-import { createUser } from "../../services/supabase/users.service";
+import { createProfile } from "../../services/supabase/profile.service";
 import { uploadImage } from "../../services/supabase/storage.service";
 import { data } from "react-router-dom";
 
@@ -32,7 +32,7 @@ const SignUpForm = () => {
       if (authError) throw authError;
 
       let avatarUrl = "";
-
+      let user_id = "";
       if (image && authData.user) {
         const { publicUrl } = await uploadImage({
           file: image,
@@ -41,12 +41,14 @@ const SignUpForm = () => {
         });
 
         avatarUrl = publicUrl;
+        user_id = authData.user.id;
       }
 
-      const { error: userError } = await createUser({
+      const { error: userError } = await createProfile({
         name,
         email,
         avatar_url: avatarUrl,
+        user_id,
       });
 
       if (userError) throw userError;
