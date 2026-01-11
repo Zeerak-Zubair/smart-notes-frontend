@@ -1,75 +1,19 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.form-stack{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 400px;
+.form-stack label{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.form-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.form-stack input{
+    width: 50%;
 }
 
-.form-row label {
-  width: 120px;
-  text-align: right;
-}
-
-.form-row input {
-  flex: 1;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.dashboard {
-  display: flex;
-  height: 100vh; /* full viewport height */
-  width: 100%;
-}
-
-/* Sidebar */
-.sidebar {
-  width: 250px;       /* fixed width */
-  background-color: #1f2937; /* dark sidebar example */
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-}
-
-/* Main container */
-.main {
-  flex: 1;                  /* take remaining space */
-  display: flex;
-  flex-direction: column;   /* topbar + content stacked vertically */
-}
-
-/* Top banner */
-.topbar {
-  display: flex;            /* make children a row */
-  align-items: center;      /* vertical alignment */
-  justify-content: space-between; /* push button to the right */
-  padding: 0 1rem;
-  height: 60px;
-  background-color: #4f46e5; /* example color */
-  color: white;
-}
-
-/* Middle content */
-.content {
-  flex: 1;                  /* fills remaining vertical space */
-  padding: 1rem;
-  overflow-y: auto;         /* scroll if content overflows */
-  background-color: #f3f4f6; /* light background */
+.form-stack button{
+    width: 20%;
 }
