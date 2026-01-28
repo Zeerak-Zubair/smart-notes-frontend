@@ -1,6 +1,5 @@
-import React, { useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import ReactQuill from "react-quill-new";
-import { useParams } from "react-router";
 
 const EditNote = () => {
   const [content, setContent] = useState("");

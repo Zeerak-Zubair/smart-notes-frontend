@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import { API_BASE_URL, API_ENDPOINTS } from './config';
+import type { AuthResponse } from '../contexts/AuthContext';
 
 export interface SignUpRequest {
   name: string;
@@ -37,7 +38,7 @@ export class AuthApiService {
     return response.json();
   }
 
-  static async signup(data: SignUpRequest): Promise<User> {
+  static async signup(data: SignUpRequest): Promise<AuthResponse> {
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('email', data.email);
@@ -52,11 +53,11 @@ export class AuthApiService {
       body: formData,
     });
 
-    return this.handleResponse<User>(response);
+    return this.handleResponse<AuthResponse>(response);
   }
 
-  static async signin(data: SignInRequest): Promise<User> {
-    
+  static async signin(data: SignInRequest): Promise<AuthResponse> {
+
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.SIGNIN}`, {
       method: 'POST',
       headers: {
@@ -65,7 +66,7 @@ export class AuthApiService {
       body: JSON.stringify(data),
     });
 
-    return this.handleResponse<User>(response);
+    return this.handleResponse<AuthResponse>(response);
   }
 
   static async signout(): Promise<void> {

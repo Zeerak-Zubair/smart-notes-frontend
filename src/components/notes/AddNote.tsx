@@ -1,4 +1,4 @@
-import React, { useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import {
@@ -12,14 +12,14 @@ import {
 } from "@radix-ui/themes";
 import { InfoCircledIcon, CheckIcon } from "@radix-ui/react-icons";
 
-interface AddNotesProps {
-  id: number;
-  created_at: Date;
-  notebook_id: number;
-  content: string;
-  order_index: number;
-  updated_at: Date;
-}
+// interface AddNotesProps {
+//   id: number;
+//   created_at: Date;
+//   notebook_id: number;
+//   content: string;
+//   order_index: number;
+//   updated_at: Date;
+// }
 
 const AddNote = () => {
   const [content, setContent] = useState("");

@@ -1,6 +1,7 @@
-import React, { useState, type FormEvent } from "react";
-import { Link } from "react-router";
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router";
 import { AuthApiService } from "../../services/api/auth.api";
+import { useAuth } from "../../contexts/AuthContext";
 import {
   Card,
   Flex,
@@ -12,6 +13,8 @@ import {
 } from "@radix-ui/themes";
 
 const SignIn = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,12 +26,11 @@ const SignIn = () => {
     setIsLoading(true);
 
     try {
-      //call the api
-      const user = await AuthApiService.signin({ email, password });
-
-      console.log("Sign In Successfull!", user);
+      const authResponse = await AuthApiService.signin({ email, password });
+      login(authResponse);
+      navigate("/dashboard");
     } catch (err: any) {
-      setError(err.message || "An error occurred during signup");
+      setError(err.message || "An error occurred during signin");
     } finally {
       setIsLoading(false);
     }

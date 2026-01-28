@@ -1,4 +1,3 @@
-import { data } from "react-router";
 import { API_BASE_URL, API_ENDPOINTS } from "./config";
 import type { User } from './auth.api';
 

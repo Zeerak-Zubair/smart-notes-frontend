@@ -1,6 +1,7 @@
-import React, { useState, type FormEvent } from "react";
-import { Link } from "react-router";
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router";
 import { AuthApiService } from "../../services/api/auth.api";
+import { useAuth } from "../../contexts/AuthContext";
 import {
   Card,
   Flex,
@@ -13,6 +14,8 @@ import {
 } from "@radix-ui/themes";
 
 const SignUp = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,22 +29,20 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      //call the api
-      const user = await AuthApiService.signup({
+      const authResponse = await AuthApiService.signup({
         name,
         email,
         password,
         image: image || undefined,
       });
 
-      console.log("signup api result: ", user);
+      login(authResponse);
+      navigate("/dashboard");
 
       setName("");
       setEmail("");
       setPassword("");
       setImage(null);
-
-      // We need to Trigger session refresh to navigate to dashboard
     } catch (err: any) {
       setError(err.message || "An error occurred during signup");
     } finally {

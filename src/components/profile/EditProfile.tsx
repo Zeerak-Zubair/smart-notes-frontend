@@ -1,10 +1,10 @@
-import React, { useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { ProfileApiService } from "../../services/api/profile.api";
 import { useParams } from "react-router";
 
-interface EditProfileProps {
-  profile_id: number;
-}
+// interface EditProfileProps {
+//   profile_id: number;
+// }
 
 const EditProfile = () => {
   // Hardcoded values for testing

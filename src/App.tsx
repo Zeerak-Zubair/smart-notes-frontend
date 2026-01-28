@@ -294,10 +294,6 @@ function App() {
             <Text size="4" color="gray" style={{ marginBottom: "1rem" }}>
               Efficiently manage your tasks and boost productivity.
             </Text>
-
-            <Button size="4" onClick={() => navigate("/signup")}>
-              Get free demo
-            </Button>
           </Flex>
         </Flex>
       </Container>
