@@ -22,7 +22,6 @@ const AddNotebook = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [count, setCount] = useState<number>(0);
-  const folder_id = "5";
   const navigate = useNavigate();
 
   // Predefined color palette
@@ -41,10 +40,10 @@ const AddNotebook = () => {
     { name: "Gray", value: "#6b7280" },
   ];
 
-  async function fetchNotebooksCount() {
+    async function fetchNotebooksCount() {
     try {
-      const fetchedCount = await NotebooksApiService.getNotebooksCount(folder_id);
-      setCount(fetchedCount);
+      const response = await NotebooksApiService.getNotebooks();
+      setCount(response.count || 0);
     } catch (error) {
       console.error("Error fetching notebooks count:", error);
     }
@@ -52,7 +51,7 @@ const AddNotebook = () => {
 
   useEffect(() => {
     fetchNotebooksCount();
-  }, [folder_id]);
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -65,7 +64,6 @@ const AddNotebook = () => {
         title,
         description,
         color,
-        folder_id,
         count + 1
       );
       console.log("Create Notebook API Response:", response);

@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import {
-  FoldersApiService,
-  type Folder,
-} from "../../services/api/folders.api";
-import {
   NotebooksApiService,
   type Notebook,
 } from "../../services/api/notebooks.api";
@@ -12,6 +8,7 @@ import {
   NotesApiService,
   type Note,
 } from "../../services/api/notes.api";
+import Sidebar from "../common/Sidebar";
 import {
   Box,
   Flex,
@@ -19,7 +16,6 @@ import {
   Button,
   Heading,
   ScrollArea,
-  Separator,
   IconButton,
   Card,
   Badge,
@@ -32,37 +28,21 @@ const Dashboard = () => {
   const [user_id] = useState<string>("27d8539a-e705-4da2-a468-3f08d6ab23c5");
 
   // Selection state
-  const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
-  const [selectedNotebookId, setSelectedNotebookId] = useState<number | null>(null);
+  const [selectedNotebookId, setSelectedNotebookId] = useState<string | null>(null);
 
   // Data state
-  const [folders, setFolders] = useState<Folder[]>([]);
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
 
   // Loading state
-  const [isLoadingFolders, setIsLoadingFolders] = useState(true);
   const [isLoadingNotebooks, setIsLoadingNotebooks] = useState(false);
   const [isLoadingNotes, setIsLoadingNotes] = useState(false);
 
-  // Fetch folders on component mount
-  async function fetchFolders() {
-    setIsLoadingFolders(true);
-    try {
-      const response = await FoldersApiService.getFolders(user_id);
-      setFolders(response.folders);
-    } catch (error) {
-      console.error("Error fetching folders:", error);
-    } finally {
-      setIsLoadingFolders(false);
-    }
-  }
-
-  // Fetch notebooks when a folder is selected
-  async function fetchNotebooks(folderId: number) {
+  // Fetch notebooks on component mount
+  async function fetchNotebooks() {
     setIsLoadingNotebooks(true);
     try {
-      const response = await NotebooksApiService.getNotebooks(String(folderId));
+      const response = await NotebooksApiService.getNotebooks();
       setNotebooks(response.notebooks);
     } catch (error) {
       console.error("Error fetching notebooks:", error);
@@ -72,10 +52,10 @@ const Dashboard = () => {
   }
 
   // Fetch notes when a notebook is selected
-  async function fetchNotes(notebookId: number) {
+  async function fetchNotes(notebookId: string) {
     setIsLoadingNotes(true);
     try {
-      const response = await NotesApiService.getNotes(String(notebookId));
+      const response = await NotesApiService.getNotes(notebookId);
       setNotes(response.notes);
     } catch (error) {
       console.error("Error fetching notes:", error);
@@ -84,22 +64,10 @@ const Dashboard = () => {
     }
   }
 
-  // Fetch folders on mount
+  // Fetch notebooks on mount
   useEffect(() => {
-    fetchFolders();
+    fetchNotebooks();
   }, [user_id]);
-
-  // Fetch notebooks when folder selection changes
-  useEffect(() => {
-    if (selectedFolderId !== null) {
-      fetchNotebooks(selectedFolderId);
-      setSelectedNotebookId(null); // Reset notebook selection
-      setNotes([]); // Clear notes
-    } else {
-      setNotebooks([]);
-      setNotes([]);
-    }
-  }, [selectedFolderId]);
 
   // Fetch notes when notebook selection changes
   useEffect(() => {
@@ -110,18 +78,13 @@ const Dashboard = () => {
     }
   }, [selectedNotebookId]);
 
-  // Handler for folder selection
-  const handleFolderClick = (folderId: number) => {
-    setSelectedFolderId(folderId);
-  };
-
   // Handler for notebook selection
-  const handleNotebookClick = (notebookId: number) => {
+  const handleNotebookClick = (notebookId: string) => {
     setSelectedNotebookId(notebookId);
   };
 
   // Handler for note click - navigate to full page
-  const handleNoteClick = (noteId: number) => {
+  const handleNoteClick = (noteId: string) => {
     navigate(`/notes/view/${noteId}`);
   };
 
@@ -143,131 +106,12 @@ const Dashboard = () => {
 
   return (
     <Flex style={{ height: "100vh", overflow: "hidden" }}>
-      {/* LEFT PANEL - Folders Sidebar */}
-      <Box
-        style={{
-          width: "280px",
-          height: "100vh",
-          background: "var(--gray-2)",
-          borderRight: "1px solid var(--gray-6)",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {/* Sidebar Header */}
-        <Box p="4">
-          <Flex direction="column" gap="3">
-            <Heading size="5" weight="bold">
-              My Folders
-            </Heading>
-            <Button
-              size="2"
-              onClick={() => navigate("/folders/add")}
-              style={{ width: "100%" }}
-            >
-              + New Folder
-            </Button>
-          </Flex>
-        </Box>
-
-        <Separator size="4" />
-
-        {/* Folders List */}
-        <ScrollArea style={{ flex: 1 }}>
-          <Box p="2">
-            {isLoadingFolders && (
-              <Box p="4">
-                <Text size="2" color="gray" align="center">
-                  Loading folders...
-                </Text>
-              </Box>
-            )}
-
-            {!isLoadingFolders && folders.length === 0 && (
-              <Box p="4">
-                <Text size="2" color="gray" align="center">
-                  No folders yet. Create your first folder to get started!
-                </Text>
-              </Box>
-            )}
-
-            {!isLoadingFolders && folders.length > 0 && (
-              <Flex direction="column" gap="1">
-                {folders.map((folder) => (
-                  <Flex
-                    key={folder.id}
-                    align="center"
-                    gap="2"
-                    p="3"
-                    style={{
-                      borderRadius: "var(--radius-2)",
-                      cursor: "pointer",
-                      background:
-                        selectedFolderId === folder.id
-                          ? "var(--accent-3)"
-                          : "transparent",
-                      transition: "background 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedFolderId !== folder.id) {
-                        e.currentTarget.style.background = "var(--gray-3)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedFolderId !== folder.id) {
-                        e.currentTarget.style.background = "transparent";
-                      }
-                    }}
-                  >
-                    <Flex
-                      align="center"
-                      gap="2"
-                      style={{ flex: 1 }}
-                      onClick={() => handleFolderClick(folder.id)}
-                    >
-                      <Text size="3" weight="medium">
-                        📁
-                      </Text>
-                      <Text
-                        size="2"
-                        weight={selectedFolderId === folder.id ? "bold" : "medium"}
-                        style={{
-                          flex: 1,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {folder.title}
-                      </Text>
-                    </Flex>
-                    <IconButton
-                      size="1"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/folders/edit/${folder.id}`);
-                      }}
-                      style={{ flexShrink: 0 }}
-                    >
-                      ✏️
-                    </IconButton>
-                  </Flex>
-                ))}
-              </Flex>
-            )}
-          </Box>
-        </ScrollArea>
-
-        {/* Sidebar Footer */}
-        <Box p="3" style={{ borderTop: "1px solid var(--gray-6)" }}>
-          <Text size="1" color="gray" align="center">
-            {folders.length} {folders.length === 1 ? "folder" : "folders"}
-          </Text>
-        </Box>
-      </Box>
-
-      {/* MIDDLE PANEL - Notebooks */}
+      {/* GLOBAL SIDEBAR */}
+      <Sidebar />
+      
+      {/* DASHBOARD CONTENT */}
+      <Flex style={{ flex: 1, overflow: "hidden" }}>
+          {/* LEFT PANEL - Notebooks */}
       <Box
         style={{
           width: "400px",
@@ -282,7 +126,6 @@ const Dashboard = () => {
         <Box p="4" style={{ borderBottom: "1px solid var(--gray-6)" }}>
           <Flex direction="column" gap="3">
             <Heading size="5">Notebooks</Heading>
-            {selectedFolderId && (
               <Button
                 size="2"
                 onClick={() => navigate("/notebooks/add")}
@@ -290,33 +133,14 @@ const Dashboard = () => {
               >
                 + New Notebook
               </Button>
-            )}
           </Flex>
         </Box>
 
         {/* Content */}
         <ScrollArea style={{ flex: 1 }}>
           <Box p="3">
-            {/* No folder selected */}
-            {!selectedFolderId && (
-              <Flex
-                direction="column"
-                align="center"
-                justify="center"
-                gap="3"
-                style={{ padding: "3rem 1rem" }}
-              >
-                <Text size="6" weight="bold">
-                  📂
-                </Text>
-                <Text size="3" color="gray" align="center">
-                  Select a folder to view notebooks
-                </Text>
-              </Flex>
-            )}
-
             {/* Loading */}
-            {selectedFolderId && isLoadingNotebooks && (
+            {isLoadingNotebooks && (
               <Flex justify="center" align="center" style={{ padding: "3rem 1rem" }}>
                 <Text size="2" color="gray">
                   Loading notebooks...
@@ -325,7 +149,7 @@ const Dashboard = () => {
             )}
 
             {/* Empty state */}
-            {selectedFolderId && !isLoadingNotebooks && notebooks.length === 0 && (
+            {!isLoadingNotebooks && notebooks.length === 0 && (
               <Card size="2">
                 <Flex
                   direction="column"
@@ -340,7 +164,7 @@ const Dashboard = () => {
                   <Flex direction="column" align="center" gap="2">
                     <Heading size="4">No Notebooks Yet</Heading>
                     <Text size="2" color="gray" align="center">
-                      Create your first notebook in this folder
+                      Create your first notebook to get started!
                     </Text>
                   </Flex>
                   <Button
@@ -354,7 +178,7 @@ const Dashboard = () => {
             )}
 
             {/* Notebooks list */}
-            {selectedFolderId && !isLoadingNotebooks && notebooks.length > 0 && (
+            {!isLoadingNotebooks && notebooks.length > 0 && (
               <Flex direction="column" gap="3">
                 {notebooks.map((notebook) => (
                   <Card
@@ -439,13 +263,11 @@ const Dashboard = () => {
         </ScrollArea>
 
         {/* Footer */}
-        {selectedFolderId && (
-          <Box p="3" style={{ borderTop: "1px solid var(--gray-6)" }}>
-            <Text size="1" color="gray" align="center">
-              {notebooks.length} {notebooks.length === 1 ? "notebook" : "notebooks"}
-            </Text>
-          </Box>
-        )}
+        <Box p="3" style={{ borderTop: "1px solid var(--gray-6)" }}>
+          <Text size="1" color="gray" align="center">
+            {notebooks.length} {notebooks.length === 1 ? "notebook" : "notebooks"}
+          </Text>
+        </Box>
       </Box>
 
       {/* RIGHT PANEL - Notes */}
@@ -622,6 +444,7 @@ const Dashboard = () => {
           </Box>
         )}
       </Box>
+      </Flex>
     </Flex>
   );
 };

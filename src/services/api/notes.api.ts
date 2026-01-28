@@ -1,9 +1,10 @@
 import { API_BASE_URL, API_ENDPOINTS } from './config';
+import { TokenStore } from '../auth/tokenStore';
 
 export interface Note {
-  id: number;
+  id: string;
   created_at: Date;
-  notebook_id: number;
+  notebook_id: string;
   title: string;
   content: string;
   order_index: number;
@@ -32,30 +33,45 @@ export class NotesApiService {
     return response.json();
   }
 
+  private static getHeaders(): HeadersInit {
+    const token = TokenStore.getAccessToken();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : '',
+    };
+  }
+
   static async getNotes(notebookId: string): Promise<GetNotesResponse> {
     const response = await fetch(
-      `${API_BASE_URL}${API_ENDPOINTS.NOTES}?notebook_id=${notebookId}`,
+      `${API_BASE_URL}${API_ENDPOINTS.NOTES_LIST}`,
       {
-        method: 'GET',
-        credentials: 'include',
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ notebook_id: notebookId }),
       }
     );
 
     return this.handleResponse<GetNotesResponse>(response);
   }
 
+  static async getNote(note_id: string): Promise<Note> {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTES_GET}`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ note_id }),
+    });
+    return this.handleResponse<Note>(response);
+  }
+
   static async createNote(
-    notebook_id: number,
+    notebook_id: string,
     title: string,
     content: string,
     order_index: number
   ): Promise<Note> {
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTES}`, {
       method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: this.getHeaders(),
       body: JSON.stringify({ notebook_id, title, content, order_index }),
     });
 
@@ -65,24 +81,28 @@ export class NotesApiService {
   static async updateNote(
     note_id: string,
     title: string,
-    content: string
+    content: string,
+    notebook_id?: string,
+    order_index?: number
   ): Promise<Note> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTES}/${note_id}`, {
+    const body: any = { note_id, title, content };
+    if (notebook_id) body.notebook_id = notebook_id;
+    if (order_index !== undefined) body.order_index = order_index;
+
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTES}`, {
       method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ title, content }),
+      headers: this.getHeaders(),
+      body: JSON.stringify(body),
     });
 
     return this.handleResponse<Note>(response);
   }
 
   static async deleteNote(note_id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTES}/${note_id}`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTES}`, {
       method: 'DELETE',
-      credentials: 'include',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ note_id }),
     });
 
     return this.handleResponse<void>(response);

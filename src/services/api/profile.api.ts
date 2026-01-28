@@ -1,10 +1,24 @@
 import { API_BASE_URL, API_ENDPOINTS } from "./config";
-import type { User } from './auth.api';
+import { TokenStore } from "../auth/tokenStore";
+
+export interface Profile {
+  user_id: string;
+  created_at: Date;
+  name: string;
+  updated_at: Date;
+  email: string;
+  profile_pic_id?: string;
+}
+
+export interface ProfilePicture {
+  id: string;
+  created_at: Date;
+  image_url: string;
+}
 
 export interface UpdateProfileRequest{
     name: string;
-    user_id: string;
-    image: File;
+    image?: File;
 }
 
 export interface ErrorResponse {
@@ -24,21 +38,50 @@ export class ProfileApiService{
         return response.json();
     }
 
-    static async updateProfile(id: string, data: UpdateProfileRequest){
+    private static getHeaders(isFormData: boolean = false): HeadersInit {
+        const token = TokenStore.getAccessToken();
+        const headers: any = {
+            'Authorization': token ? `Bearer ${token}` : '',
+        };
+        
+        if (!isFormData) {
+            headers['Content-Type'] = 'application/json';
+        }
+        
+        return headers;
+    }
+
+    static async getProfile(userId: string): Promise<Profile> {
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PROFILE}/${userId}`, {
+            method: 'GET',
+            headers: this.getHeaders(),
+        });
+        return this.handleResponse<Profile>(response);
+    }
+
+    static async updateProfile(userId: string, data: UpdateProfileRequest): Promise<Profile> {
         const formData = new FormData();
         formData.append('name', data.name);
-        formData.append('user_id', data.user_id);
-        formData.append('image', data.image);
-        console.log(data.name);
-        console.log(data.user_id);
-        console.log(data.image);
-        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PROFILE}/${id}`, {
+        
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PROFILE}/${userId}`, {
             method: 'PUT',
+            headers: this.getHeaders(true),
             body: formData,
         });
 
-        return this.handleResponse<User>(response);
+        return this.handleResponse<Profile>(response);
     }
-    
-    
+
+    static async updateProfilePicture(image: File): Promise<Profile> {
+        const formData = new FormData();
+        formData.append('image', image);
+
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PROFILE_PICTURE}`, {
+            method: 'PUT',
+            headers: this.getHeaders(true),
+            body: formData,
+        });
+
+        return this.handleResponse<Profile>(response);
+    }
 }

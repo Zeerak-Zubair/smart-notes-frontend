@@ -1,13 +1,14 @@
 import { API_BASE_URL, API_ENDPOINTS } from './config';
+import { TokenStore } from '../auth/tokenStore';
 
 export type Notebook = {
-  id: number;
+  id: string;
   created_at: Date;
   title: string;
   description: string;
   color: string;
   updated_at: Date;
-  folder_id: number;
+  user_id: string;
   order_index: number;
 };
 
@@ -20,7 +21,6 @@ export interface CreateNotebookDTO {
   title: string;
   description: string;
   color: string;
-  folder_id: number;
   order_index: number;
 }
 
@@ -41,54 +41,63 @@ export class NotebooksApiService {
         return response.json();
     }
 
-    static async getNotebooks(folderId: string): Promise<GetNotebooksResponse> {
+
+    private static getHeaders(): HeadersInit {
+        const token = TokenStore.getAccessToken();
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : '',
+        };
+    }
+
+    static async getNotebooks(): Promise<GetNotebooksResponse> {
             const response = await fetch(
-            `${API_BASE_URL}${API_ENDPOINTS.NOTEBOOKS}?folder_id=${folderId}`,
+            `${API_BASE_URL}${API_ENDPOINTS.NOTEBOOKS}`,
             {
                 method: 'GET',
-                credentials: 'include',
+                headers: this.getHeaders(),
             }
             );
 
             return this.handleResponse<GetNotebooksResponse>(response);
         }
 
-    static async getNotebooksCount(folderId: string): Promise<number> {
-        const response = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.NOTEBOOKS}/count?folder_id=${folderId}`,
-        {
-            method: 'GET',
-            credentials: 'include',
-        }
-        );
-
-        return this.handleResponse<number>(response);
+    static async getNotebook(notebook_id: string): Promise<Notebook> {
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTEBOOKS_GET}`, {
+            method: 'POST',
+            headers: this.getHeaders(),
+            body: JSON.stringify({ notebook_id }),
+        });
+        return this.handleResponse<Notebook>(response);
     }
 
-    static async createNotebook(title:string, description:string, color:string, folder_id:string, order_index:number): Promise<Notebook> {
+    static async createNotebook(title:string, description:string, color:string, order_index:number): Promise<Notebook> {
 
         const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTEBOOKS}`, {
         method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title, description, color, folder_id, order_index }),
+        headers: this.getHeaders(),
+        body: JSON.stringify({ title, description, color, order_index }),
         });
 
         return this.handleResponse<Notebook>(response);
     }
 
-    static async updateNotebook(notebook_id:string, title: string, description: string, color:string): Promise<Notebook>{
+    static async updateNotebook(notebook_id:string, title: string, description: string, color:string, order_index: number = 0): Promise<Notebook>{
 
-        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTEBOOKS}/${notebook_id}`, {
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTEBOOKS}`, {
             method: 'PUT',
-            credentials: 'include',
-            headers: {
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ title, description, color }),
+            headers: this.getHeaders(),
+            body: JSON.stringify({ notebook_id, title, description, color, order_index }),
         });
         return this.handleResponse<Notebook>(response);
+    }
+
+    static async deleteNotebook(notebook_id: string): Promise<void> {
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.NOTEBOOKS}`, {
+            method: 'DELETE',
+            headers: this.getHeaders(),
+            body: JSON.stringify({ notebook_id }),
+        });
+        return this.handleResponse<void>(response);
     }
 }

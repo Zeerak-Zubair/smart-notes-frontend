@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import "@radix-ui/themes/styles.css";
@@ -8,12 +7,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 // Auth Components
 import SignIn from "./components/auth/SignIn";
 import SignUp from "./components/auth/SignUp";
-
-// Folder Components
-import AddFolder from "./components/folders/AddFolder";
-import EditFolder from "./components/folders/EditFolder";
-import ListFolders from "./components/folders/ListFolders";
-import ViewFolders from "./components/folders/ViewFolders";
 
 // Notebook Components
 import AddNotebook from "./components/notebooks/AddNotebook";
@@ -28,7 +21,7 @@ import EditNote from "./components/notes/EditNote.tsx";
 
 import ViewProfile from "./components/profile/ViewProfile.tsx";
 import EditProfile from "./components/profile/EditProfile.tsx";
-import { Theme, ThemePanel } from "@radix-ui/themes";
+import { Theme } from "@radix-ui/themes";
 import AddNote from "./components/notes/AddNote.tsx";
 import Dashboard from "./components/dashboard/Dashboard.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
@@ -46,12 +39,6 @@ createRoot(document.getElementById("root")!).render(
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-
-        {/* Folder Routes */}
-        <Route path="/folders" element={<ProtectedRoute><ListFolders /></ProtectedRoute>} />
-        <Route path="/folders/add" element={<ProtectedRoute><AddFolder /></ProtectedRoute>} />
-        <Route path="/folders/edit/:id" element={<ProtectedRoute><EditFolder /></ProtectedRoute>} />
-        <Route path="/folders/view/:id" element={<ProtectedRoute><ViewFolders /></ProtectedRoute>} />
 
         {/* Notebook Routes */}
         <Route path="/notebooks" element={<ProtectedRoute><ListNotebooks /></ProtectedRoute>} />

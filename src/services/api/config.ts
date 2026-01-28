@@ -7,8 +7,11 @@ export const API_ENDPOINTS = {
     SIGNOUT: '/api/auth/signout',
     SESSION: '/api/auth/session',
   },
-  FOLDERS: '/api/folders',
   NOTEBOOKS: '/api/notebooks',
+  NOTEBOOKS_GET: '/api/notebooks/get',
   NOTES: '/api/notes',
-  PROFILE: '/api/profile'
+  NOTES_LIST: '/api/notes/list',
+  NOTES_GET: '/api/notes/get',
+  PROFILE: '/api/profile',
+  PROFILE_PICTURE: '/api/profile/picture'
 } as const;

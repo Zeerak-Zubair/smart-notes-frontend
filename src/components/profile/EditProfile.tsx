@@ -9,13 +9,11 @@ import { useParams } from "react-router";
 const EditProfile = () => {
   // Hardcoded values for testing
   const { id } = useParams(); //profile id
-  const USER_ID = "27d8539a-e705-4da2-a468-3f08d6ab23c5"; //user_id which will be accessed from session
 
   const [name, setName] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -33,17 +31,17 @@ const EditProfile = () => {
       return;
     }
 
-    setIsSubmitting(true);
 
     try {
-      const user = await ProfileApiService.updateProfile(id!, {
-        name,
-        user_id: USER_ID,
-        image,
-      });
+      if (name) {
+        await ProfileApiService.updateProfile(id!, { name });
+      }
+      
+      if (image) {
+        await ProfileApiService.updateProfilePicture(image);
+      }
 
       setSuccess("Profile updated successfully!");
-      console.log("Profile updated!", user);
     } catch (err: any) {
       setError(err.message || "An error occurred during profile update");
     }

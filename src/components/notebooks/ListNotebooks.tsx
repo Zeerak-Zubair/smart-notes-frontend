@@ -20,12 +20,13 @@ const ListNotebooks = () => {
   const navigate = useNavigate();
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const folder_id: string = "5";
+  // User ID - hardcoded for now, will be replaced with auth context
+  const [user_id] = useState<string>("27d8539a-e705-4da2-a468-3f08d6ab23c5");
 
   async function fetchNotebooks() {
     setIsLoading(true);
     try {
-      const response = await NotebooksApiService.getNotebooks(folder_id);
+      const response = await NotebooksApiService.getNotebooks();
       console.log(response);
       setNotebooks(response.notebooks);
     } catch (error) {
@@ -37,7 +38,7 @@ const ListNotebooks = () => {
 
   useEffect(() => {
     fetchNotebooks();
-  }, [folder_id]);
+  }, [user_id]);
 
   return (
     <Box
@@ -53,7 +54,7 @@ const ListNotebooks = () => {
           <Flex direction="column" gap="2">
             <Heading size="8">Notebooks</Heading>
             <Text size="3" color="gray">
-              {notebooks.length} {notebooks.length === 1 ? "notebook" : "notebooks"} in this folder
+              {notebooks.length} {notebooks.length === 1 ? "notebook" : "notebooks"}
             </Text>
           </Flex>
           <Button

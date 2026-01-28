@@ -5,6 +5,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import { TokenStore } from "../services/auth/tokenStore";
 
 export interface AuthResponse {
   message: string;
@@ -26,7 +27,6 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = "smart_notes_auth";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [authData, setAuthData] = useState<AuthResponse | null>(null);
@@ -36,22 +36,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const loadAuthData = () => {
       try {
-        const storedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
-        if (storedAuth) {
-          const parsed: AuthResponse = JSON.parse(storedAuth);
-
-          // Check if token is expired
-          const currentTime = Math.floor(Date.now() / 1000);
-          if (parsed.expires_at && parsed.expires_at > currentTime) {
-            setAuthData(parsed);
-          } else {
-            // Token expired, clear it
-            localStorage.removeItem(AUTH_STORAGE_KEY);
-          }
+        const storedRefreshToken = localStorage.getItem('refresh_token');
+        if (storedRefreshToken) {
+            // We have a refresh token. Ideally we should call an endpoint to get a new access token here.
+             // For now, we just acknowledge we might be logged in, but we don't have an access token yet.
+             // Or if the requirement implies we should have persisted the user session... 
+             // "keep the access token in memory using state"
+             // If we reload, memory is cleared. So we must use refresh token to get new access token.
+             // Since I don't have a refresh API endpoint in the spec provided earlier, 
+             // I will just implement the storage part as requested:
+             // "provide a mechanism to store a refresh token in localStorage"
+             
+             // I will assume for this step we strictly follow: 
+             // 1. refresh token -> localStorage
+             // 2. access token -> state (and TokenStore for API usage)
         }
       } catch (error) {
         console.error("Failed to load auth data:", error);
-        localStorage.removeItem(AUTH_STORAGE_KEY);
       } finally {
         setIsLoading(false);
       }
@@ -62,12 +63,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (authResponse: AuthResponse) => {
     setAuthData(authResponse);
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authResponse));
+    TokenStore.setAccessToken(authResponse.access_token);
+    localStorage.setItem('refresh_token', authResponse.refresh_token);
   };
 
   const logout = () => {
     setAuthData(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    TokenStore.setAccessToken(null);
+    localStorage.removeItem('refresh_token');
   };
 
   const isAuthenticated = authData !== null;

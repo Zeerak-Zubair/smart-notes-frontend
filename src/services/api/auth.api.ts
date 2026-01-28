@@ -1,6 +1,26 @@
 import type { Session } from '@supabase/supabase-js';
 import { API_BASE_URL, API_ENDPOINTS } from './config';
-import type { AuthResponse } from '../contexts/AuthContext';
+
+// Response models based on user spec
+export interface SignInResponse {
+  message: string;
+  success: boolean;
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  expires_at: number;
+  refresh_token: string;
+}
+
+export interface SignUpResponse {
+  message: string;
+  success: boolean;
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  expires_at: number;
+  refresh_token: string;
+}
 
 export interface SignUpRequest {
   name: string;
@@ -38,7 +58,7 @@ export class AuthApiService {
     return response.json();
   }
 
-  static async signup(data: SignUpRequest): Promise<AuthResponse> {
+  static async signup(data: SignUpRequest): Promise<SignUpResponse> {
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('email', data.email);
@@ -53,10 +73,10 @@ export class AuthApiService {
       body: formData,
     });
 
-    return this.handleResponse<AuthResponse>(response);
+    return this.handleResponse<SignUpResponse>(response);
   }
 
-  static async signin(data: SignInRequest): Promise<AuthResponse> {
+  static async signin(data: SignInRequest): Promise<SignInResponse> {
 
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.SIGNIN}`, {
       method: 'POST',
@@ -66,7 +86,7 @@ export class AuthApiService {
       body: JSON.stringify(data),
     });
 
-    return this.handleResponse<AuthResponse>(response);
+    return this.handleResponse<SignInResponse>(response);
   }
 
   static async signout(): Promise<void> {
