@@ -2,12 +2,13 @@ import { API_BASE_URL, API_ENDPOINTS } from "./config";
 import { TokenStore } from "../auth/tokenStore";
 
 export interface Profile {
-  user_id: string;
-  created_at: Date;
+  user_id?: string; // Optional now as per new spec it might not be there or unnamed? Assuming it might still be there but let's stick to what's guaranteed
+  created_at?: Date;
   name: string;
-  updated_at: Date;
+  updated_at?: Date;
   email: string;
   profile_pic_id?: string;
+  avatar_url?: string | null;
 }
 
 export interface ProfilePicture {
@@ -49,6 +50,14 @@ export class ProfileApiService{
         }
         
         return headers;
+    }
+
+    static async getCurrentProfile(): Promise<Profile> {
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.PROFILE}`, {
+            method: 'GET',
+            headers: this.getHeaders(),
+        });
+        return this.handleResponse<Profile>(response);
     }
 
     static async getProfile(userId: string): Promise<Profile> {

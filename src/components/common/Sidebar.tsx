@@ -1,31 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import {
   Box,
   Flex,
   Tooltip,
-  IconButton,
   Avatar,
-  Text,
   Separator,
+  DropdownMenu,
 } from "@radix-ui/themes";
 import {
   DashboardIcon,
   FileTextIcon,
-  GearIcon,
-  ChatBubbleIcon,
-  DoubleArrowLeftIcon,
-  DoubleArrowRightIcon,
-  ExitIcon,
+  Pencil1Icon,
 } from "@radix-ui/react-icons";
 import { useAuth } from "../../contexts/AuthContext";
 import { AuthApiService } from "../../services/api/auth.api";
+import { ProfileApiService, type Profile } from "../../services/api/profile.api";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  
+  // Collapsible feature removed
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await ProfileApiService.getCurrentProfile();
+        setProfile(data);
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -40,198 +50,115 @@ const Sidebar = () => {
   const menuItems = [
     { label: "Dashboard", icon: <DashboardIcon width="20" height="20" />, path: "/dashboard" },
     { label: "Notebooks", icon: <FileTextIcon width="20" height="20" />, path: "/notebooks" },
+    { label: "Notes", icon: <Pencil1Icon width="20" height="20" />, path: "/notes" },
   ];
 
-  const bottomItems = [
-    { label: "Settings", icon: <GearIcon width="20" height="20" />, path: "/settings" },
-  ];
+  // Settings removed as per request
 
   return (
     <Box
       style={{
-        width: isCollapsed ? "64px" : "240px",
+        width: "64px",
         height: "100vh",
-        backgroundColor: "#2e1065", // Deep purple from reference
-        transition: "width 0.3s ease",
+        backgroundColor: "var(--sidebar-bg)",
         display: "flex",
         flexDirection: "column",
-        borderRight: "1px solid #4c1d95",
+        borderRight: "1px solid var(--sidebar-border)",
         flexShrink: 0,
-        color: "white",
+        color: "var(--sidebar-text)",
       }}
     >
-      <Flex direction="column" height="100%" p="3" align={isCollapsed ? "center" : "stretch"}>
+      <Flex direction="column" height="100%" p="3" align="center">
         {/* Logo / Brand */}
-        <Flex justify={isCollapsed ? "center" : "between"} align="center" mb="5">
-            <Box
-                style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "8px",
-                    background: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: "bold",
-                    fontSize: "18px",
-                    color: "white",
-                    cursor: "pointer"
-                }}
-                onClick={() => navigate("/dashboard")}
-            >
-                A
-            </Box>
-            {!isCollapsed && (
-                <Text weight="bold" size="3" style={{ color: "white", marginLeft: "10px" }}>
-                    AdlerOne
-                </Text>
-            )}
-             {!isCollapsed && (
-                <IconButton
-                    size="1"
-                    variant="ghost"
-                    style={{ color: "rgba(255,255,255,0.7)" }}
-                    onClick={() => setIsCollapsed(!isCollapsed)}
+        <Flex justify="center" align="center" mb="5">
+            <Flex align="center" style={{ cursor: "pointer" }} onClick={() => navigate("/dashboard")}>
+                <Box
+                    style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "8px",
+                        background: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: "bold",
+                        fontSize: "18px",
+                        color: "white",
+                    }}
                 >
-                    <DoubleArrowLeftIcon />
-                </IconButton>
-            )}
+                    SN
+                </Box>
+            </Flex>
         </Flex>
-        
-        {isCollapsed && (
-             <IconButton
-                size="1"
-                variant="ghost"
-                style={{ color: "rgba(255,255,255,0.7)", marginBottom: "20px" }}
-                onClick={() => setIsCollapsed(!isCollapsed)}
-            >
-                <DoubleArrowRightIcon />
-            </IconButton>
-        )}
 
         {/* Navigation Items */}
-        <Flex direction="column" gap="4" style={{ flex: 1 }}>
+        <Flex direction="column" gap="4" style={{ flex: 1, width: "100%" }}>
           {menuItems.map((item) => (
-            <Tooltip key={item.path} content={isCollapsed ? item.label : undefined} side="right">
+            <Tooltip key={item.path} content={item.label} side="right">
               <Box
                 onClick={() => navigate(item.path)}
                 style={{
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "center",
                   padding: "10px",
                   borderRadius: "8px",
                   cursor: "pointer",
                   backgroundColor: location.pathname.startsWith(item.path)
-                    ? "rgba(255, 255, 255, 0.15)"
+                    ? "var(--sidebar-hover)"
                     : "transparent",
                   color: location.pathname.startsWith(item.path)
-                    ? "white"
-                    : "rgba(255, 255, 255, 0.7)",
+                    ? "var(--sidebar-text)"
+                    : "var(--sidebar-text-muted)",
                   transition: "all 0.2s",
-                  justifyContent: isCollapsed ? "center" : "flex-start",
                 }}
               >
                 {item.icon}
-                {!isCollapsed && (
-                  <Text size="2" ml="3">
-                    {item.label}
-                  </Text>
-                )}
               </Box>
             </Tooltip>
           ))}
         </Flex>
         
         {/* Divider */}
-         <Separator size="4" style={{ backgroundColor: "rgba(255,255,255,0.1)", margin: "10px 0" }} />
+         <Separator size="4" style={{ backgroundColor: "var(--sidebar-hover)", margin: "10px 0" }} />
 
 
         {/* Bottom Section */}
-        <Flex direction="column" gap="4">
-             {/* Settings */}
-             {bottomItems.map((item) => (
-                <Tooltip key={item.path} content={isCollapsed ? item.label : undefined} side="right">
-                <Box
-                    onClick={() => navigate(item.path)}
-                    style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                     backgroundColor: location.pathname.startsWith(item.path)
-                        ? "rgba(255, 255, 255, 0.15)"
-                        : "transparent",
-                    color: "rgba(255, 255, 255, 0.7)",
-                    justifyContent: isCollapsed ? "center" : "flex-start",
-                    }}
-                >
-                    {item.icon}
-                    {!isCollapsed && (
-                    <Text size="2" ml="3">
-                        {item.label}
-                    </Text>
-                    )}
-                </Box>
-                </Tooltip>
-            ))}
-
-             {/* Profile / Chat (Placeholder from image) */}
-             <Tooltip content={isCollapsed ? "Messages" : undefined} side="right">
-                <Box
-                    style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    color: "rgba(255, 255, 255, 0.7)",
-                    justifyContent: isCollapsed ? "center" : "flex-start",
-                    }}
-                >
-                    <ChatBubbleIcon width="20" height="20" />
-                    {!isCollapsed && (
-                    <Text size="2" ml="3">
-                        Messages
-                    </Text>
-                    )}
-                </Box>
-            </Tooltip>
-
+        <Flex direction="column" gap="4" style={{ width: "100%" }}>
              {/* User Profile */}
-            <Tooltip content={"User Profile"} side="right">
-                <Flex
-                    align="center"
-                    justify={isCollapsed ? "center" : "between"}
-                    style={{
-                        padding: "8px",
-                        borderRadius: "8px",
-                        backgroundColor: "rgba(0, 0, 0, 0.2)",
-                        marginTop: "10px",
-                        cursor: "pointer"
-                    }}
-                    onClick={() => navigate("/profile")}
-                >
-                    <Avatar
-                        size="2"
-                        src={undefined}
-                        fallback={"U"}
-                        radius="full"
-                    />
-                    {!isCollapsed && (
-                         <Box ml="3" style={{ overflow: "hidden" }}>
-                            <Text size="1" weight="bold" style={{ color: "white", display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {"User"}
-                            </Text>
-                         </Box>
-                    )}
-                     {!isCollapsed && (
-                        <IconButton size="1" variant="ghost" color="gray" onClick={(e) => { e.stopPropagation(); handleLogout(); }}>
-                            <ExitIcon />
-                        </IconButton>
-                     )}
-                </Flex>
-            </Tooltip>
+            <DropdownMenu.Root>
+                <DropdownMenu.Trigger>
+                    <div style={{ outline: 'none', width: '100%' }}>
+                        <Flex
+                            align="center"
+                            justify="center"
+                            style={{
+                                padding: "8px",
+                                borderRadius: "8px",
+                                backgroundColor: "rgba(0, 0, 0, 0.2)",
+                                marginTop: "10px",
+                                cursor: "pointer"
+                            }}
+                        >
+                            <Avatar
+                                size="2"
+                                src={profile?.avatar_url || undefined}
+                                fallback={profile?.name?.charAt(0).toUpperCase() || "U"}
+                                radius="full"
+                            />
+                        </Flex>
+                    </div>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content>
+                    <DropdownMenu.Item onSelect={() => navigate("/profile")}>
+                        Edit Profile Picture
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Separator />
+                    <DropdownMenu.Item color="red" onSelect={handleLogout}>
+                        Log Out
+                    </DropdownMenu.Item>
+                </DropdownMenu.Content>
+            </DropdownMenu.Root>
         </Flex>
       </Flex>
     </Box>

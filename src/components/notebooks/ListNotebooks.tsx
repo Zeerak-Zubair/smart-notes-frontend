@@ -4,6 +4,7 @@ import {
   NotebooksApiService,
   type Notebook,
 } from "../../services/api/notebooks.api";
+import NotebookCard from "./NotebookCard";
 import {
   Box,
   Card,
@@ -12,8 +13,8 @@ import {
   Button,
   Heading,
   Grid,
-  IconButton,
-  Badge,
+
+
 } from "@radix-ui/themes";
 
 const ListNotebooks = () => {
@@ -107,91 +108,7 @@ const ListNotebooks = () => {
         {!isLoading && notebooks.length > 0 && (
           <Grid columns={{ initial: "1", sm: "2", md: "3" }} gap="4">
             {notebooks.map((notebook) => (
-              <Card
-                key={notebook.id}
-                style={{
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  borderLeft: `4px solid ${notebook.color || "var(--accent-9)"}`,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow = "var(--shadow-4)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "";
-                }}
-                onClick={() => navigate(`/notebooks/view/${notebook.id}`)}
-              >
-                <Flex direction="column" gap="3" p="1">
-                  {/* Card Header */}
-                  <Flex justify="between" align="start">
-                    <Flex direction="column" gap="1" style={{ flex: 1, minWidth: 0 }}>
-                      <Heading
-                        size="4"
-                        weight="bold"
-                        style={{
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {notebook.title}
-                      </Heading>
-                      {notebook.color && (
-                        <Badge
-                          color="gray"
-                          variant="soft"
-                          size="1"
-                          style={{
-                            width: "fit-content",
-                            background: notebook.color + "20",
-                            color: notebook.color,
-                          }}
-                        >
-                          {notebook.color}
-                        </Badge>
-                      )}
-                    </Flex>
-                    <IconButton
-                      size="1"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/notebooks/edit/${notebook.id}`);
-                      }}
-                    >
-                      ✏️
-                    </IconButton>
-                  </Flex>
-
-                  {/* Description */}
-                  <Text
-                    size="2"
-                    color="gray"
-                    style={{
-                      overflow: "hidden",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      minHeight: "2.5em",
-                    }}
-                  >
-                    {notebook.description || "No description"}
-                  </Text>
-
-                  {/* Footer */}
-                  <Flex justify="between" align="center" pt="2" style={{ borderTop: "1px solid var(--gray-5)" }}>
-                    <Text size="1" color="gray">
-                      Order: {notebook.order_index}
-                    </Text>
-                    <Text size="1" color="gray">
-                      Updated {new Date(notebook.updated_at).toLocaleDateString()}
-                    </Text>
-                  </Flex>
-                </Flex>
-              </Card>
+              <NotebookCard key={notebook.id} notebook={notebook} />
             ))}
           </Grid>
         )}
